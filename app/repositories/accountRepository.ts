@@ -1,0 +1,42 @@
+import prisma from "@/lib/db";
+import { Currency } from "@/app/lib/enums";
+
+export const AccountRepository = {
+    async findByUserId(userId: number) {
+        const accounts = await prisma.account.findMany({
+            where: { userId },
+            include: {
+                dailyClosings: {
+                    take: 1,
+                    orderBy: { closingDate: "desc" },
+                },
+            },
+            orderBy: {
+                createdAt: "asc",
+            },
+        });
+
+        // Serialize Decimals
+        return accounts.map(account => ({
+            ...account,
+            balance: Number(account.balance),
+            dailyClosings: account.dailyClosings.map(dc => ({
+                ...dc,
+                systemBalance: Number(dc.systemBalance),
+                actualCashBalance: Number(dc.actualCashBalance),
+                difference: Number(dc.difference),
+            }))
+        }));
+    },
+
+    async findByUserIdAndCurrency(userId: number, currency: Currency) {
+        const accounts = await prisma.account.findMany({
+            where: { userId, currency: currency as any },
+        });
+
+        return accounts.map(a => ({
+            ...a,
+            balance: Number(a.balance),
+        }));
+    },
+};
