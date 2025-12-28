@@ -4,7 +4,7 @@ import { SupplierRepository } from "@/app/repositories/supplierRepository";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function createSupplierAction(formData: FormData) {
+export async function createSupplierAction(prevState: any, formData: FormData) {
     const name = formData.get("name") as string;
     const phone = formData.get("phone") as string;
 

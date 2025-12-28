@@ -41,7 +41,7 @@ export function CreateAccountDialog() {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<CreateAccountValues>({
+  const form = useForm({
     resolver: zodResolver(createAccountSchema),
     defaultValues: {
       name: "",
@@ -131,7 +131,13 @@ export function CreateAccountDialog() {
                 <FormItem>
                   <FormLabel>Initial Balance</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" {...field} />
+                    <Input
+                      type="number"
+                      step="0.01"
+                      {...field}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      value={field.value as any}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

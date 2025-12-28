@@ -31,8 +31,8 @@ export const currencies = [
 
 export const createAccountSchema = z.object({
   name: z.string().min(1, "Account name is required"),
-  currency: z.enum(currencies, {
-    errorMap: () => ({ message: "Please select a valid currency" }),
+  currency: z.enum(currencies as unknown as [string, ...string[]], {
+    message: "Please select a valid currency",
   }),
   balance: z.coerce.number().default(0),
 });
