@@ -39,6 +39,7 @@ import { Plus } from "lucide-react";
 
 export function CreateAccountDialog() {
   const [open, setOpen] = useState(false);
+  const [genericError, setGenericError] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const form = useForm({
@@ -51,10 +52,11 @@ export function CreateAccountDialog() {
   });
 
   function onSubmit(values: CreateAccountValues) {
+    setGenericError(""); // Clear previous errors
     startTransition(async () => {
       const result = await createAccountAction(values);
       if (result.error) {
-        console.error(result.error);
+        setGenericError(result.error);
       } else {
         setOpen(false);
         form.reset();
@@ -135,14 +137,23 @@ export function CreateAccountDialog() {
                       type="number"
                       step="0.01"
                       {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
                       value={field.value as any}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        field.onChange(isNaN(val) ? 0 : val);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {genericError && (
+              <div className="text-sm text-red-500 bg-red-50 p-2 rounded">
+                {genericError}
+              </div>
+            )}
 
             <div className="flex justify-end pt-4">
               <Button type="submit" disabled={isPending}>

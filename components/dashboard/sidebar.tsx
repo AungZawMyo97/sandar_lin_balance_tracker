@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, ArrowRightLeft, Wallet, LogOut } from "lucide-react";
+import { LayoutDashboard, ArrowRightLeft, Wallet, LogOut, Calculator } from "lucide-react";
 import { logoutAction } from "@/app/users/actions/authActions"; // Import the action
 
 const routes = [
@@ -24,6 +24,12 @@ const routes = [
     icon: Wallet,
     href: "/accounts",
     color: "text-pink-700",
+  },
+  {
+    label: "Daily Status",
+    icon: Calculator,
+    href: "/closings",
+    color: "text-emerald-500",
   },
 ];
 
