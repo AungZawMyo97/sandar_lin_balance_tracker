@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { Currency } from "@/app/lib/enums";
 import { createAccountSchema } from "@/lib/schemas";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
@@ -27,7 +28,7 @@ export async function createAccountAction(
       data: {
         userId: parseInt(userId),
         name,
-        currency: currency,
+        currency: currency as Currency,
         balance,
         status: "ACTIVE",
       },
