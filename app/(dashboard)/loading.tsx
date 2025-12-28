@@ -39,7 +39,6 @@ export default function DashboardLoading() {
                     </CardContent>
                 </Card>
 
-                {/* Placeholder for Quick Actions or other widgets */}
                 <Card className="col-span-3">
                     <CardHeader>
                         <Skeleton className="h-6 w-[100px]" />

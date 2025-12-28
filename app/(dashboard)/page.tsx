@@ -32,26 +32,21 @@ export default async function DashboardPage() {
 
   const uId = parseInt(userId);
 
-  // 1. Fetch Real Balances
   const accounts = await AccountService.getUserAccounts(uId);
   const mmkBalance = accounts.filter(a => a.currency === "MMK").reduce((sum, a) => sum + Number(a.balance), 0);
   const thbBalance = accounts.filter(a => a.currency === "THB").reduce((sum, a) => sum + Number(a.balance), 0);
   const usdBalance = accounts.filter(a => a.currency === "USD").reduce((sum, a) => sum + Number(a.balance), 0);
   const sgdBalance = accounts.filter(a => a.currency === "SGD").reduce((sum, a) => sum + Number(a.balance), 0);
 
-  // 2. Estimate Total Wealth (Mock Rates for Demo - in real app, fetch from DB/API)
-  // TODO: Add a Settings page for "Base Rates"
   const RATE_THB = 110;
   const RATE_USD = 4500;
   const RATE_SGD = 3300;
   const estimatedWealth = mmkBalance + (thbBalance * RATE_THB) + (usdBalance * RATE_USD) + (sgdBalance * RATE_SGD);
 
-  // 3. Fetch Recent Transactions
   const { data: recentTransactions } = await TransactionRepository.getHistory(uId, { page: 1, limit: 5 });
 
   return (
     <div className="flex-1 space-y-6">
-      {/* 1. HEADER SECTION */}
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
@@ -68,9 +63,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* 2. STATS CARDS */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* Card 1: Total MMK */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -88,7 +81,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Card 2: Total Baht */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -106,7 +98,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Card 3: Net Wealth */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -122,7 +113,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Card 4: Active Loans */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Money Lent</CardTitle>
@@ -135,7 +125,6 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* 3. RECENT TRANSACTIONS TABLE */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
@@ -194,7 +183,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* 4. QUICK ACTIONS SIDEBAR */}
         <Card className="col-span-3">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
