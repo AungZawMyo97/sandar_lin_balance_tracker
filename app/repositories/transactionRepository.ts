@@ -164,4 +164,41 @@ export const TransactionRepository = {
             },
         };
     },
+    async findById(userId: number, id: number, type: "STANDARD" | "CROSS") {
+        if (type === "STANDARD") {
+            const txn = await prisma.exchangeTransaction.findUnique({
+                where: { id },
+                include: { fromAccount: true, toAccount: true },
+            });
+            if (!txn || txn.fromAccount.userId !== userId) return null;
+
+            return {
+                ...txn,
+                kind: "STANDARD",
+                amountOut: Number(txn.amountOut),
+                amountIn: Number(txn.amountIn),
+                exchangeRate: Number(txn.exchangeRate),
+                fromAccount: { ...txn.fromAccount, balance: Number(txn.fromAccount.balance) },
+                toAccount: { ...txn.toAccount, balance: Number(txn.toAccount.balance) },
+            };
+        } else {
+            const txn = await prisma.crossTransaction.findUnique({
+                where: { id },
+                include: { supplier: true, bridgeAccount: true, targetAccount: true },
+            });
+            if (!txn || txn.bridgeAccount.userId !== userId) return null;
+
+            return {
+                ...txn,
+                kind: "CROSS",
+                foreignAmount: Number(txn.foreignAmount),
+                bridgeAmount: Number(txn.bridgeAmount),
+                supplierRate: Number(txn.supplierRate),
+                targetAmount: Number(txn.targetAmount),
+                customerRate: Number(txn.customerRate),
+                bridgeAccount: { ...txn.bridgeAccount, balance: Number(txn.bridgeAccount.balance) },
+                targetAccount: { ...txn.targetAccount, balance: Number(txn.targetAccount.balance) },
+            };
+        }
+    },
 };

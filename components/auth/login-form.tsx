@@ -23,7 +23,7 @@ import { loginSchema, LoginFormValues } from "@/lib/schemas";
 import { useState, useTransition } from "react";
 import { loginAction } from "@/app/users/actions/authActions";
 
-export function LoginForm({}: React.ComponentProps<"div">) {
+export function LoginForm({ }: React.ComponentProps<"div">) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
 
@@ -50,7 +50,7 @@ export function LoginForm({}: React.ComponentProps<"div">) {
       <CardHeader>
         <CardTitle>Login to your account</CardTitle>
         <CardDescription>
-          Enter your email below to login to your account
+          Enter your phone number below to login to your account
         </CardDescription>
       </CardHeader>
       <CardContent>

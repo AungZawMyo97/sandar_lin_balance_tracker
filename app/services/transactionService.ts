@@ -57,4 +57,7 @@ export const TransactionService = {
     async getHistory(userId: number, params: { page?: number; limit?: number; startDate?: Date; endDate?: Date }) {
         return await TransactionRepository.getHistory(userId, params);
     },
+    async getTransaction(userId: number, id: number, type: "STANDARD" | "CROSS") {
+        return await TransactionRepository.findById(userId, id, type);
+    },
 };

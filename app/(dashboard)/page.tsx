@@ -188,16 +188,41 @@ export default async function DashboardPage() {
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>Common daily tasks</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="grid grid-cols-1 gap-2">
             <Link href="/transactions/create">
-              <Button variant="outline" className="w-full justify-start mb-2">
-                <ArrowDownLeft className="mr-2 h-4 w-4" /> New Transaction
-              </Button>
+              <div className="flex items-center p-3 rounded-lg border hover:bg-slate-50 transition-colors cursor-pointer group">
+                <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center mr-4 group-hover:bg-emerald-200 transition-colors">
+                  <ArrowDownLeft className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">New Transaction</h4>
+                  <p className="text-xs text-muted-foreground">Record a buy/sell</p>
+                </div>
+              </div>
             </Link>
+
             <Link href="/suppliers/create">
-              <Button variant="outline" className="w-full justify-start mt-2">
-                <RefreshCw className="mr-2 h-4 w-4" /> Add New Agent
-              </Button>
+              <div className="flex items-center p-3 rounded-lg border hover:bg-slate-50 transition-colors cursor-pointer group">
+                <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center mr-4 group-hover:bg-purple-200 transition-colors">
+                  <RefreshCw className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">Add New Agent</h4>
+                  <p className="text-xs text-muted-foreground">Register supplier</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/transactions">
+              <div className="flex items-center p-3 rounded-lg border hover:bg-slate-50 transition-colors cursor-pointer group">
+                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
+                  <TrendingUp className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">View History</h4>
+                  <p className="text-xs text-muted-foreground">Check recent logs</p>
+                </div>
+              </div>
             </Link>
           </CardContent>
         </Card>

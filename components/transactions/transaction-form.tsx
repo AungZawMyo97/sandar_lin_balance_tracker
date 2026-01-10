@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createTransactionAction } from "@/app/actions/transaction";
 import { Currency } from "@/app/lib/enums";
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowRight, Loader2, ArrowLeftRight, User, Wallet, Calculator, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { ArrowRight, Loader2, ArrowLeftRight, User, Wallet, Calculator, ArrowDownLeft, ArrowUpRight, Scale } from "lucide-react";
 
 // Local types
 type Account = {
@@ -47,6 +47,9 @@ export function TransactionForm({ accounts, suppliers }: TransactionFormProps) {
     const [selectedDestId, setSelectedDestId] = useState<string>("");
     const [rate, setRate] = useState<string>("");
     const [foreignAmount, setForeignAmount] = useState<string>("");
+    const [rateBasis, setRateBasis] = useState<"UNIT" | "100K">("UNIT");
+
+
 
     // Cross Mode States
     const [crossType, setCrossType] = useState<"FOREIGN_TO_HELD" | "HELD_TO_FOREIGN">("FOREIGN_TO_HELD");
@@ -59,6 +62,16 @@ export function TransactionForm({ accounts, suppliers }: TransactionFormProps) {
     const [customerRate, setCustomerRate] = useState<string>(""); // Price
     const [targetAmount, setTargetAmount] = useState<string>("");
 
+    // Auto-switch basis for THB default
+    useEffect(() => {
+        const currency = mode === "CROSS" ? crossForeignCurrency : foreignCurrency;
+        if (currency === "THB") {
+            setRateBasis("100K");
+        } else {
+            setRateBasis("UNIT");
+        }
+    }, [foreignCurrency, crossForeignCurrency, mode]);
+
     const sourceAccounts = useMemo(() => {
         if (mode === "BUY") return accounts.filter(a => a.currency === "MMK");
         return accounts.filter(a => a.currency === foreignCurrency);
@@ -70,19 +83,36 @@ export function TransactionForm({ accounts, suppliers }: TransactionFormProps) {
     }, [accounts, mode, foreignCurrency]);
 
     const bridgeAccounts = useMemo(() => accounts.filter(a => a.currency === "MMK"), [accounts]);
-    const targetAccounts = useMemo(() => accounts.filter(a => a.currency !== "MMK"), [accounts]);
+    const targetAccounts = useMemo(() => accounts, [accounts]); // Allow all accounts, including MMK
 
     const calculateStandardTotal = () => {
         const r = parseFloat(rate);
         const amt = parseFloat(foreignAmount);
-        if (!isNaN(r) && !isNaN(amt)) return (r * amt).toFixed(0);
+        if (!isNaN(r) && !isNaN(amt)) {
+            if (rateBasis === "100K") {
+                // Rate is 100,000 MMK = X Foreign? or Rate is Foreign Amount for 100k MMK?
+                // User said: "768 THB = 100000 MMK" -> The Rate INPUT is 768.
+                // Meaning: 100,000 MMK costs 768 THB.
+                // We want Total MMK.
+                // Formula: (Amount / Rate) * 100,000
+                // Example: Amount 1000 THB. Rate 768.
+                // (1000 / 768) * 100,000 = 130,208.
+                return ((amt * 100000) / r).toFixed(0);
+            }
+            return (r * amt).toFixed(0);
+        }
         return "0";
     };
 
     const calculateCrossMMK = () => {
         const sRate = parseFloat(supplierRate);
         const amt = parseFloat(crossForeignAmount);
-        if (!isNaN(sRate) && !isNaN(amt)) return (sRate * amt).toFixed(2);
+        if (!isNaN(sRate) && !isNaN(amt)) {
+            if (rateBasis === "100K") {
+                return ((amt * 100000) / sRate).toFixed(2);
+            }
+            return (sRate * amt).toFixed(2);
+        }
         return "0";
     };
 
@@ -191,10 +221,29 @@ export function TransactionForm({ accounts, suppliers }: TransactionFormProps) {
                                         </div>
 
                                         <div>
-                                            <Label className="text-xs font-medium uppercase text-muted-foreground mb-1.5 block">Agent Rate (Cost)</Label>
+                                            <div className="flex items-center justify-between mb-1.5">
+                                                <Label className="text-xs font-medium uppercase text-muted-foreground block">Agent Rate (Cost)</Label>
+                                                <div className="flex bg-slate-200 rounded-md p-0.5">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setRateBasis("UNIT")}
+                                                        className={`text-[9px] px-1.5 py-0.5 rounded-sm font-medium transition-all ${rateBasis === "UNIT" ? "bg-white shadow text-slate-800" : "text-slate-500 hover:text-slate-700"}`}
+                                                    >
+                                                        1 Unit
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setRateBasis("100K")}
+                                                        className={`text-[9px] px-1.5 py-0.5 rounded-sm font-medium transition-all ${rateBasis === "100K" ? "bg-white shadow text-slate-800" : "text-slate-500 hover:text-slate-700"}`}
+                                                    >
+                                                        100k
+                                                    </button>
+                                                </div>
+                                            </div>
                                             <Input
                                                 type="number" step="0.0001"
                                                 value={supplierRate} onChange={e => setSupplierRate(e.target.value)}
+                                                onWheel={(e) => e.currentTarget.blur()}
                                                 placeholder="Amount" className="bg-white font-mono" required
                                             />
                                         </div>
@@ -227,19 +276,19 @@ export function TransactionForm({ accounts, suppliers }: TransactionFormProps) {
                                                 <Select value={crossForeignCurrency} onValueChange={setCrossForeignCurrency}>
                                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                                     <SelectContent>
-                                                        {Object.values(Currency).filter(c => !["MMK", "THB"].includes(c)).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                                        {Object.values(Currency).filter(c => !["MMK"].includes(c)).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                                                     </SelectContent>
                                                 </Select>
                                             </div>
                                             <div className="col-span-2">
                                                 <Label className="text-xs font-medium uppercase text-muted-foreground mb-1.5 block">Amount</Label>
-                                                <Input type="number" value={crossForeignAmount} onChange={e => setCrossForeignAmount(e.target.value)} placeholder="0.00" required className="font-bold text-lg" />
+                                                <Input type="number" value={crossForeignAmount} onChange={e => setCrossForeignAmount(e.target.value)} onWheel={(e) => e.currentTarget.blur()} placeholder="0.00" required className="font-bold text-lg" />
                                             </div>
                                         </div>
 
                                         <div>
                                             <Label className="text-xs font-medium uppercase text-muted-foreground mb-1.5 block">Customer Rate (Price)</Label>
-                                            <Input type="number" step="0.0001" value={customerRate} onChange={e => setCustomerRate(e.target.value)} placeholder="0.00" required className="font-mono" />
+                                            <Input type="number" step="0.0001" value={customerRate} onChange={e => setCustomerRate(e.target.value)} onWheel={(e) => e.currentTarget.blur()} placeholder="0.00" required className="font-mono" />
                                         </div>
                                     </div>
 
@@ -256,7 +305,7 @@ export function TransactionForm({ accounts, suppliers }: TransactionFormProps) {
                                             </div>
                                             <div>
                                                 <Label className="text-xs font-medium uppercase text-muted-foreground mb-1.5 block">Final Amount</Label>
-                                                <Input type="number" value={targetAmount} onChange={e => setTargetAmount(e.target.value)} placeholder="Amount to Pay/Receive" required className="bg-slate-100 font-bold" />
+                                                <Input type="number" value={targetAmount} onChange={e => setTargetAmount(e.target.value)} onWheel={(e) => e.currentTarget.blur()} placeholder="Amount to Pay/Receive" required className="bg-slate-100 font-bold" />
                                             </div>
                                         </div>
                                     </div>
@@ -287,11 +336,30 @@ export function TransactionForm({ accounts, suppliers }: TransactionFormProps) {
                                 </div>
 
                                 <div className="col-span-5">
-                                    <Label className="mb-2 block font-semibold text-sm">Rate (MMK)</Label>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <Label className="font-semibold text-sm">Rate</Label>
+                                        <div className="flex bg-slate-200 rounded-md p-0.5">
+                                            <button
+                                                type="button"
+                                                onClick={() => setRateBasis("UNIT")}
+                                                className={`text-[10px] px-2 py-0.5 rounded-sm font-medium transition-all ${rateBasis === "UNIT" ? "bg-white shadow text-slate-800" : "text-slate-500 hover:text-slate-700"}`}
+                                            >
+                                                1 Unit
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setRateBasis("100K")}
+                                                className={`text-[10px] px-2 py-0.5 rounded-sm font-medium transition-all ${rateBasis === "100K" ? "bg-white shadow text-slate-800" : "text-slate-500 hover:text-slate-700"}`}
+                                            >
+                                                100k MMK
+                                            </button>
+                                        </div>
+                                    </div>
                                     <div className="relative">
                                         <Input
                                             type="number" step="0.01"
                                             value={rate} onChange={(e) => setRate(e.target.value)}
+                                            onWheel={(e) => e.currentTarget.blur()}
                                             className="h-11 pl-8 bg-white font-mono text-base"
                                             placeholder="0.00"
                                             required
@@ -359,6 +427,7 @@ export function TransactionForm({ accounts, suppliers }: TransactionFormProps) {
                                         step="0.01"
                                         value={foreignAmount}
                                         onChange={(e) => setForeignAmount(e.target.value)}
+                                        onWheel={(e) => e.currentTarget.blur()}
                                         className="bg-transparent border-0 border-b border-slate-700 rounded-none px-0 text-3xl font-bold placeholder:text-slate-800 focus-visible:ring-0 focus-visible:border-white h-auto py-2 text-white"
                                         placeholder="0.00"
                                         required
