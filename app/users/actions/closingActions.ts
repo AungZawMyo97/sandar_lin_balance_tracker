@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getCurrentUser } from "@/lib/session";
 import { revalidatePath } from "next/cache";
 import { DailyClosingRepository } from "@/app/repositories/dailyClosingRepository";
+import { ProfitService } from "@/app/services/profitService";
 import prisma from "@/lib/db";
 
 const createClosingSchema = z.object({
@@ -45,12 +46,17 @@ export async function createDailyClosingAction(prevState: any, formData: FormDat
             return { error: "This account is already closed for today." };
         }
 
-        // 3. Create Record
+        // 3. Calculate profit for today in MMK
+        const today = new Date();
+        const profitPerDayMMK = await ProfitService.calculateDailyProfitMMK(accountId, today);
+
+        // 4. Create Record
         await DailyClosingRepository.create({
             accountId,
             systemBalance,
             actualCashBalance: actualBalance,
             difference,
+            profitPerDayMMK,
             note,
         });
 

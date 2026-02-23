@@ -7,6 +7,7 @@ export class DailyClosingRepository {
         systemBalance: number;
         actualCashBalance: number; // Keeping DB field name as is, but logic handles it as Actual Balance
         difference: number;
+        profitPerDayMMK?: number;
         note?: string;
     }) {
         return await prisma.dailyClosing.create({
@@ -15,6 +16,9 @@ export class DailyClosingRepository {
                 systemBalance: new Prisma.Decimal(data.systemBalance),
                 actualCashBalance: new Prisma.Decimal(data.actualCashBalance),
                 difference: new Prisma.Decimal(data.difference),
+                profitPerDayMMK: data.profitPerDayMMK !== undefined 
+                    ? new Prisma.Decimal(data.profitPerDayMMK) 
+                    : null,
                 note: data.note,
             },
         });

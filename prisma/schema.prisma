@@ -156,6 +156,7 @@ model DailyClosing {
   systemBalance     Decimal  @db.Decimal(12, 2) 
   actualCashBalance Decimal  @db.Decimal(12, 2)
   difference        Decimal  @db.Decimal(10, 2) 
+  profitPerDayMMK   Decimal? @db.Decimal(12, 2)
   
   note              String?  
 
@@ -233,4 +234,14 @@ enum Currency {
   CNY
   AED
   MYR
+}
+
+model ExchangeRate {
+  id          Int      @id @default(autoincrement())
+  currency    Currency @unique
+  rate        Decimal  @db.Decimal(10, 4)
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  
+  @@index([currency])
 }

@@ -22,6 +22,7 @@ import { getCurrentUser } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { AccountService } from "@/app/services/accountService";
 import { TransactionRepository } from "@/app/repositories/transactionRepository";
+import { ExchangeRateService } from "@/app/services/exchangeRateService";
 import { Currency } from "@/app/lib/enums";
 
 export default async function DashboardPage() {
@@ -38,9 +39,11 @@ export default async function DashboardPage() {
   const usdBalance = accounts.filter(a => a.currency === "USD").reduce((sum, a) => sum + Number(a.balance), 0);
   const sgdBalance = accounts.filter(a => a.currency === "SGD").reduce((sum, a) => sum + Number(a.balance), 0);
 
-  const RATE_THB = 110;
-  const RATE_USD = 4500;
-  const RATE_SGD = 3300;
+  // Get exchange rates from database
+  const rates = await ExchangeRateService.getRatesMap();
+  const RATE_THB = rates.THB || 110;
+  const RATE_USD = rates.USD || 4500;
+  const RATE_SGD = rates.SGD || 3300;
   const estimatedWealth = mmkBalance + (thbBalance * RATE_THB) + (usdBalance * RATE_USD) + (sgdBalance * RATE_SGD);
 
   const { data: recentTransactions } = await TransactionRepository.getHistory(uId, { page: 1, limit: 5 });

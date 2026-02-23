@@ -56,12 +56,14 @@ export default async function ClosingsPage() {
                                 <TableHead>System</TableHead>
                                 <TableHead>Actual</TableHead>
                                 <TableHead>Diff</TableHead>
+                                <TableHead>Profit (MMK)</TableHead>
                                 <TableHead>Note</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {history.map((record) => {
                                 const diff = Number(record.difference);
+                                const profit = record.profitPerDayMMK ? Number(record.profitPerDayMMK) : null;
                                 return (
                                     <TableRow key={record.id}>
                                         <TableCell>{format(record.closingDate, "MMM d, HH:mm")}</TableCell>
@@ -71,13 +73,16 @@ export default async function ClosingsPage() {
                                         <TableCell className={diff > 0 ? "text-green-600" : diff < 0 ? "text-red-600" : "text-gray-500"}>
                                             {diff > 0 ? "+" : ""}{diff.toLocaleString()}
                                         </TableCell>
+                                        <TableCell className={profit !== null ? (profit > 0 ? "text-green-600 font-semibold" : profit < 0 ? "text-red-600" : "text-gray-500") : "text-muted-foreground"}>
+                                            {profit !== null ? `${profit > 0 ? "+" : ""}${profit.toLocaleString()}` : "-"}
+                                        </TableCell>
                                         <TableCell>{record.note || "-"}</TableCell>
                                     </TableRow>
                                 )
                             })}
                             {history.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                                    <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
                                         No closing records yet.
                                     </TableCell>
                                 </TableRow>
