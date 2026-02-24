@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const sharp = require('sharp');
 const path = require('path');
+const fs = require('fs');
 
-const iconsDir = path.join(__dirname, '..', 'public', 'icons');
+const publicIconsDir = path.join(__dirname, '..', 'public', 'icons');
+const appDir = path.join(__dirname, '..', 'app');
 
 // Create a clean, simple SVG icon that sharp can render
-// "SDL" text on a dark background with rounded feel
+// "SDL" text on a dark background. No rounded corners so iOS and Android maskable works correctly.
 const createSvg = (size) => `
 <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   <defs>
@@ -14,7 +16,7 @@ const createSvg = (size) => `
       <stop offset="100%" style="stop-color:#0f172a"/>
     </linearGradient>
   </defs>
-  <rect width="${size}" height="${size}" rx="${Math.round(size * 0.2)}" fill="url(#bg)"/>
+  <rect width="${size}" height="${size}" fill="url(#bg)"/>
   <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" 
         font-family="system-ui, -apple-system, sans-serif" 
         font-weight="800" font-size="${Math.round(size * 0.32)}px" 
@@ -23,23 +25,28 @@ const createSvg = (size) => `
 </svg>`;
 
 async function generateIcons() {
-    const sizes = [
-        { name: 'apple-touch-icon.png', size: 180 },
-        { name: 'icon-192.png', size: 192 },
-        { name: 'icon-512.png', size: 512 },
+    // Ensure directories exist
+    if (!fs.existsSync(publicIconsDir)) {
+        fs.mkdirSync(publicIconsDir, { recursive: true });
+    }
+
+    const icons = [
+        { dir: publicIconsDir, name: 'icon-192.png', size: 192 },
+        { dir: publicIconsDir, name: 'icon-512.png', size: 512 },
+        { dir: appDir, name: 'apple-icon.png', size: 180 }, // Next.js App Router auto-detects app/apple-icon.png
     ];
     
-    for (const { name, size } of sizes) {
+    for (const { dir, name, size } of icons) {
         const svg = createSvg(size);
         const buf = Buffer.from(svg);
+        const outPath = path.join(dir, name);
         
         await sharp(buf)
             .png()
-            .toFile(path.join(iconsDir, name));
+            .toFile(outPath);
         
-        const fs = require('fs');
-        const stat = fs.statSync(path.join(iconsDir, name));
-        console.log(`Created ${name}: ${stat.size} bytes`);
+        const stat = fs.statSync(outPath);
+        console.log(`Created ${name}: ${stat.size} bytes in ${dir}`);
     }
     
     console.log('Done! All icons generated.');
