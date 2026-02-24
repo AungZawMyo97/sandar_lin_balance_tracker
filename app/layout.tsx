@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   description: "SDL Daily Balance Tracker",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "SDL Tracker",
   },
   icons: {
