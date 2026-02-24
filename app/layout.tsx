@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "SDL Daily Balance Tracker",
-  description: "SDL Daily Balance Tracke",
+  description: "SDL Daily Balance Tracker",
 };
 
 export default function RootLayout({
@@ -30,6 +30,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#0f172a" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icons/SDL_Icon.svg" />
       </head>
       <body

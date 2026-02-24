@@ -1,9 +1,8 @@
-const CACHE_NAME = "balance-tracker-v1";
+const CACHE_NAME = "balance-tracker-v2";
 const PRECACHE_URLS = [
   "/",
   "/manifest.webmanifest",
-  "/icons/icon-192.svg",
-  "/icons/icon-512.svg",
+  "/icons/SDL_Icon.svg",
 ];
 
 self.addEventListener("install", (event) => {

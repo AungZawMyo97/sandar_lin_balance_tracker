@@ -10,23 +10,24 @@ export default async function ExchangeRatesPage() {
         redirect("/login");
     }
 
-    const rates = await ExchangeRateService.getAllRates();
-    const ratesMap = await ExchangeRateService.getRatesMap();
+    const ratesToMMK = await ExchangeRateService.getRatesMap();
+    const ratesFromMMK = await ExchangeRateService.getRatesFromMMKMap();
 
-    // Get all currencies except MMK
-    const allCurrencies = Object.values(Currency).filter(c => c !== "MMK");
+    // Only THB, AED, JPY exchange rates are tracked
+    const allCurrencies: Currency[] = [Currency.THB, Currency.AED, Currency.JPY];
 
     return (
         <div className="space-y-6">
             <div>
                 <h2 className="text-3xl font-bold tracking-tight">Exchange Rates</h2>
                 <p className="text-muted-foreground">
-                    Manage exchange rates for currency conversion. Rates can be updated frequently.
+                    Manage exchange rates for currency conversion. Each currency has rates in both directions.
                 </p>
             </div>
 
             <ExchangeRatesForm 
-                initialRates={ratesMap}
+                ratesToMMK={ratesToMMK}
+                ratesFromMMK={ratesFromMMK}
                 currencies={allCurrencies}
             />
         </div>

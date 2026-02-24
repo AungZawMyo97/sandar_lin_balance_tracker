@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, useCallback } from "react";
 import { createTransactionAction } from "@/app/actions/transaction";
 import { Currency } from "@/app/lib/enums";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowRight, Loader2, ArrowLeftRight, User, Wallet, Calculator, ArrowDownLeft, ArrowUpRight, Scale } from "lucide-react";
+import { ArrowRight, Loader2, ArrowLeftRight, User } from "lucide-react";
 
 // Local types
 type Account = {
@@ -47,9 +46,7 @@ export function TransactionForm({ accounts, suppliers }: TransactionFormProps) {
     const [selectedDestId, setSelectedDestId] = useState<string>("");
     const [rate, setRate] = useState<string>("");
     const [foreignAmount, setForeignAmount] = useState<string>("");
-    const [rateBasis, setRateBasis] = useState<"UNIT" | "100K">("UNIT");
-
-
+    const [rateBasisOverride, setRateBasisOverride] = useState<"UNIT" | "100K" | null>(null);
 
     // Cross Mode States
     const [crossType, setCrossType] = useState<"FOREIGN_TO_HELD" | "HELD_TO_FOREIGN">("FOREIGN_TO_HELD");
@@ -62,15 +59,16 @@ export function TransactionForm({ accounts, suppliers }: TransactionFormProps) {
     const [customerRate, setCustomerRate] = useState<string>(""); // Price
     const [targetAmount, setTargetAmount] = useState<string>("");
 
-    // Auto-switch basis for THB default
-    useEffect(() => {
+    // Derive rateBasis from currency, allow manual override
+    const rateBasis = useMemo(() => {
+        if (rateBasisOverride !== null) return rateBasisOverride;
         const currency = mode === "CROSS" ? crossForeignCurrency : foreignCurrency;
-        if (currency === "THB") {
-            setRateBasis("100K");
-        } else {
-            setRateBasis("UNIT");
-        }
-    }, [foreignCurrency, crossForeignCurrency, mode]);
+        return currency === "THB" ? "100K" : "UNIT";
+    }, [rateBasisOverride, foreignCurrency, crossForeignCurrency, mode]);
+
+    const setRateBasis = useCallback((value: "UNIT" | "100K") => {
+        setRateBasisOverride(value);
+    }, []);
 
     const sourceAccounts = useMemo(() => {
         if (mode === "BUY") return accounts.filter(a => a.currency === "MMK");
@@ -166,7 +164,7 @@ export function TransactionForm({ accounts, suppliers }: TransactionFormProps) {
                 <CardDescription>Select the type of exchange operation</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
-                <Tabs value={mode} onValueChange={(v) => setMode(v as any)} className="w-full mb-8">
+                <Tabs value={mode} onValueChange={(v) => setMode(v as "BUY" | "SELL" | "CROSS")} className="w-full mb-8">
                     <TabsList className="grid w-full grid-cols-3 h-12">
                         <TabsTrigger value="BUY" className="h-10 data-[state=active]:bg-green-100 data-[state=active]:text-green-700 data-[state=active]:font-bold border-b-2 data-[state=active]:border-green-600 rounded-none transition-all">
                             Buy Foreign
@@ -191,7 +189,7 @@ export function TransactionForm({ accounts, suppliers }: TransactionFormProps) {
                         <div className="space-y-6">
                             {/* CROSS TYPE SELECTOR */}
                             <div className="bg-slate-50 p-1 rounded-lg inline-block w-full">
-                                <Tabs value={crossType} onValueChange={(v) => setCrossType(v as any)} className="w-full">
+                                <Tabs value={crossType} onValueChange={(v) => setCrossType(v as "FOREIGN_TO_HELD" | "HELD_TO_FOREIGN")} className="w-full">
                                     <TabsList className="w-full grid grid-cols-2">
                                         <TabsTrigger value="FOREIGN_TO_HELD">Customer Gives {crossForeignCurrency}</TabsTrigger>
                                         <TabsTrigger value="HELD_TO_FOREIGN">Customer Wants {crossForeignCurrency}</TabsTrigger>

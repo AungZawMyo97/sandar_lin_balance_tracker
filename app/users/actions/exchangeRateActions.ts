@@ -6,7 +6,7 @@ import { Currency } from "@/app/lib/enums";
 import { revalidatePath } from "next/cache";
 
 export async function updateExchangeRatesFormAction(
-    prevState: any,
+    prevState: { success: boolean; error: string | null },
     formData: FormData
 ) {
     const user = await getCurrentUser();
@@ -15,26 +15,29 @@ export async function updateExchangeRatesFormAction(
     }
 
     try {
-        const ratesToUpdate: Array<{ currency: Currency; rate: number }> = [];
+        const ratesToUpdate: Array<{ currency: Currency; rate: number; rateFromMMK: number }> = [];
         
-        // Get all currencies except MMK
+        // Only THB, AED, JPY exchange rates are tracked
         const allCurrencies: Currency[] = [
             Currency.THB,
-            Currency.USD,
-            Currency.SGD,
-            Currency.EUR,
-            Currency.JPY,
-            Currency.CNY,
             Currency.AED,
-            Currency.MYR,
+            Currency.JPY,
         ];
 
         allCurrencies.forEach((currency) => {
-            const value = formData.get(currency);
-            if (value) {
-                const rate = parseFloat(value as string);
-                if (!isNaN(rate) && rate > 0) {
-                    ratesToUpdate.push({ currency, rate });
+            const toMMK = formData.get(`${currency}_to_mmk`);
+            const fromMMK = formData.get(`${currency}_from_mmk`);
+            
+            if (toMMK || fromMMK) {
+                const rateToMMK = toMMK ? parseFloat(toMMK as string) : 0;
+                const rateFromMMK = fromMMK ? parseFloat(fromMMK as string) : 0;
+                
+                if ((rateToMMK > 0) || (rateFromMMK > 0)) {
+                    ratesToUpdate.push({ 
+                        currency, 
+                        rate: rateToMMK, 
+                        rateFromMMK: rateFromMMK 
+                    });
                 }
             }
         });
@@ -47,8 +50,9 @@ export async function updateExchangeRatesFormAction(
         revalidatePath("/exchange-rates");
         revalidatePath("/");
         return { success: true, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Exchange Rate Update Error:", error);
-        return { success: false, error: error.message || "Failed to update exchange rates" };
+        const message = error instanceof Error ? error.message : "Failed to update exchange rates";
+        return { success: false, error: message };
     }
 }
