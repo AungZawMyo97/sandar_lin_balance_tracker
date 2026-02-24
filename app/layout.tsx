@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import PWARegister from "../components/pwa/register-sw";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,7 +52,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <PWARegister />
         {children}
       </body>
     </html>

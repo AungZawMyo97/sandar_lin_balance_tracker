@@ -43,3 +43,10 @@ next-env.d.ts
 /app/generated/prisma
 
 .vercel
+
+# PWA generated files (next-pwa)
+public/sw.js
+public/sw.js.map
+public/workbox-*.js
+public/workbox-*.js.map
+public/swe-worker-*.js
