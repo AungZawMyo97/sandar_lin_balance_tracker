@@ -1,12 +1,12 @@
 import { getCurrentUser } from "@/lib/session";
 import { AccountService } from "@/app/services/accountService";
 import { redirect } from "next/navigation";
-import Link from "next/link";
+
 import { format } from "date-fns"; // npm install date-fns
 import { CreateAccountDialog } from "@/components/accounts/create-account-dialogue";
+import { ClosingDialog } from "@/components/closings/closing-dialog";
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import {
   Card,
   CardContent,
@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Wallet, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Wallet, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default async function AccountsPage() {
   const userId = await getCurrentUser();
@@ -130,11 +130,7 @@ export default async function AccountsPage() {
 
                       {/* Actions */}
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/accounts/${account.id}/closing`}>
-                            Close Balance
-                          </Link>
-                        </Button>
+                        <ClosingDialog account={{ id: account.id, name: account.name, currency: account.currency, balance: Number(account.balance) }} />
                       </TableCell>
                     </TableRow>
                   );

@@ -35,7 +35,7 @@ export default async function ClosingsPage() {
                                 {Number(account.balance).toLocaleString()}
                                 <span className="text-sm font-normal text-muted-foreground ml-1">{account.currency}</span>
                             </div>
-                            <ClosingDialog account={{ ...account, balance: Number(account.balance) }} />
+                            <ClosingDialog account={{ id: account.id, name: account.name, currency: account.currency, balance: Number(account.balance) }} />
                         </CardContent>
                     </Card>
                 ))}

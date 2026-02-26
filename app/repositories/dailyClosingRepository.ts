@@ -10,7 +10,7 @@ export class DailyClosingRepository {
         profitPerDayMMK?: number;
         note?: string;
     }) {
-        return await prisma.dailyClosing.create({
+        const result = await prisma.dailyClosing.create({
             data: {
                 accountId: data.accountId,
                 systemBalance: new Prisma.Decimal(data.systemBalance),
@@ -22,10 +22,19 @@ export class DailyClosingRepository {
                 note: data.note,
             },
         });
+
+        // Convert Decimals to Number/Null to safely pass to Client Components
+        return {
+            ...result,
+            systemBalance: Number(result.systemBalance),
+            actualCashBalance: Number(result.actualCashBalance),
+            difference: Number(result.difference),
+            profitPerDayMMK: result.profitPerDayMMK ? Number(result.profitPerDayMMK) : null,
+        };
     }
 
     static async getHistory(userId: number, limit = 20) {
-        return await prisma.dailyClosing.findMany({
+        const history = await prisma.dailyClosing.findMany({
             where: {
                 account: {
                     userId: userId,
@@ -44,6 +53,14 @@ export class DailyClosingRepository {
             },
             take: limit,
         });
+
+        return history.map(record => ({
+            ...record,
+            systemBalance: Number(record.systemBalance),
+            actualCashBalance: Number(record.actualCashBalance),
+            difference: Number(record.difference),
+            profitPerDayMMK: record.profitPerDayMMK ? Number(record.profitPerDayMMK) : null,
+        }));
     }
 
     static async getTodayClosing(accountId: number) {

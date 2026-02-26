@@ -25,6 +25,7 @@ export const AccountRepository = {
                 systemBalance: Number(dc.systemBalance),
                 actualCashBalance: Number(dc.actualCashBalance),
                 difference: Number(dc.difference),
+                profitPerDayMMK: dc.profitPerDayMMK ? Number(dc.profitPerDayMMK) : null,
             }))
         }));
     },

@@ -13,7 +13,7 @@ const createClosingSchema = z.object({
     note: z.string().optional(),
 });
 
-export async function createDailyClosingAction(prevState: any, formData: FormData) {
+export async function createDailyClosingAction(prevState: unknown, formData: FormData) {
     const user = await getCurrentUser();
     if (!user) return { error: "Unauthorized" };
 
@@ -61,6 +61,7 @@ export async function createDailyClosingAction(prevState: any, formData: FormDat
         });
 
         revalidatePath("/closings");
+        revalidatePath("/accounts");
         return { success: true };
     } catch (error) {
         console.error("Closing Error:", error);

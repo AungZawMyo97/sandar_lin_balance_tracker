@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormState } from "react-dom"; // Use standard react-dom hook
+
 import { createDailyClosingAction } from "@/app/users/actions/closingActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState, useTransition } from "react";
+import { useState, useActionState } from "react";
 import { Loader2 } from "lucide-react";
 import { useFormStatus } from "react-dom";
 
@@ -45,23 +45,39 @@ export function ClosingDialog({ account }: ClosingDialogProps) {
     const [open, setOpen] = useState(false);
     const [actualBalance, setActualBalance] = useState<string>("");
 
-    // @ts-ignore
-    const [state, dispatch] = useFormState(createDailyClosingAction, initialState);
+    // @ts-expect-error - useActionState type signature mismatch with createDailyClosingAction
+    const [state, dispatch] = useActionState(createDailyClosingAction, initialState);
 
     const diff = actualBalance ? Number(actualBalance) - account.balance : 0;
     const isSurplus = diff > 0;
     const isDeficit = diff < 0;
 
-    // Handle successful close logic in parent or effect, but state updates here
-    // If state.success is true, we should probably close dialog. 
-    // But useFormState result is reactive.
+    // Instead of using useEffect, reset when Dialog closes or action is successful
+    // React 19 Action forms handle state slightly differently. 
+    // We update the open state by reacting to the form state in the render path 
+    // without cascading. If success is true and we're open, we render nothing and flip 
+    // state asynchronously or handle it cleanly.
+    
+    // An alternative safe way is reacting to the Dialog onOpenChange directly.
+    const handleOpenChange = (newOpen: boolean) => {
+        if (!newOpen) {
+            setActualBalance("");
+            // dispatch null or similar to clear state if possible, though React Action state is hard to clear.
+        }
+        setOpen(newOpen);
+    }
+    
+    // We should close if success. A simple approach without effect cascading is
+    // calling setOpen outside during render is allowed if it's conditional and consistent, 
+    // but React compiler can be strict.
+    // The previous implementation was:
     if (state?.success && open) {
         setOpen(false);
-        // Ideally reset state/form here
+        setActualBalance("");
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm">Close Day</Button>
             </DialogTrigger>
