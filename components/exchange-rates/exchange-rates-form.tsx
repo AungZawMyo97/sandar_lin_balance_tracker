@@ -27,8 +27,8 @@ function SubmitButton() {
 }
 
 interface ExchangeRatesFormProps {
-    ratesToMMK: Record<Currency, number>;
-    ratesFromMMK: Record<Currency, number>;
+    buyRates: Record<Currency, number>;
+    sellRates: Record<Currency, number>;
     currencies: Currency[];
 }
 
@@ -37,7 +37,7 @@ const initialState = {
     error: null as string | null,
 };
 
-export function ExchangeRatesForm({ ratesToMMK, ratesFromMMK, currencies }: ExchangeRatesFormProps) {
+export function ExchangeRatesForm({ buyRates, sellRates, currencies }: ExchangeRatesFormProps) {
     const [state, formAction] = useActionState(updateExchangeRatesFormAction, initialState);
 
     return (
@@ -45,52 +45,52 @@ export function ExchangeRatesForm({ ratesToMMK, ratesFromMMK, currencies }: Exch
             <CardHeader>
                 <CardTitle>Current Exchange Rates</CardTitle>
                 <CardDescription>
-                    Update exchange rates. Each currency has two rates: to MMK and from MMK.
+                    Update exchange rates. Each currency has Buy and Sell rates in MMK.
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <form action={formAction} className="space-y-6">
                     {currencies.map((currency) => (
                         <div key={currency} className="rounded-lg border p-4 space-y-3">
-                            <h3 className="font-semibold text-lg">{currency}</h3>
+                            <h3 className="font-semibold text-lg">1 {currency}</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor={`${currency}_to_mmk`}>
-                                        {currency} → MMK
+                                    <Label htmlFor={`${currency}_buy_mmk`}>
+                                        Buy (MMK)
                                     </Label>
                                     <Input
-                                        id={`${currency}_to_mmk`}
-                                        name={`${currency}_to_mmk`}
+                                        id={`${currency}_buy_mmk`}
+                                        name={`${currency}_buy_mmk`}
                                         type="number"
                                         step="0.0001"
                                         min="0"
-                                        defaultValue={ratesToMMK[currency] || ""}
+                                        defaultValue={buyRates[currency] || ""}
                                         placeholder="0.0000"
                                         required
                                     />
-                                    {ratesToMMK[currency] > 0 && (
+                                    {buyRates[currency] > 0 && (
                                         <p className="text-xs text-muted-foreground">
-                                            1 {currency} = {ratesToMMK[currency].toLocaleString()} MMK
+                                            1 {currency} = {buyRates[currency].toLocaleString()} MMK (buy)
                                         </p>
                                     )}
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor={`${currency}_from_mmk`}>
-                                        MMK → {currency}
+                                    <Label htmlFor={`${currency}_sell_mmk`}>
+                                        Sell (MMK)
                                     </Label>
                                     <Input
-                                        id={`${currency}_from_mmk`}
-                                        name={`${currency}_from_mmk`}
+                                        id={`${currency}_sell_mmk`}
+                                        name={`${currency}_sell_mmk`}
                                         type="number"
                                         step="0.0001"
                                         min="0"
-                                        defaultValue={ratesFromMMK[currency] || ""}
+                                        defaultValue={sellRates[currency] || ""}
                                         placeholder="0.0000"
                                         required
                                     />
-                                    {ratesFromMMK[currency] > 0 && (
+                                    {sellRates[currency] > 0 && (
                                         <p className="text-xs text-muted-foreground">
-                                            1 MMK = {ratesFromMMK[currency].toLocaleString()} {currency}
+                                            1 {currency} = {sellRates[currency].toLocaleString()} MMK (sell)
                                         </p>
                                     )}
                                 </div>

@@ -10,8 +10,8 @@ export default async function ExchangeRatesPage() {
         redirect("/login");
     }
 
-    const ratesToMMK = await ExchangeRateService.getRatesMap();
-    const ratesFromMMK = await ExchangeRateService.getRatesFromMMKMap();
+    const buyRates = await ExchangeRateService.getRatesMap();
+    const sellRates = await ExchangeRateService.getSellRatesMap();
 
     // Only THB, AED, JPY exchange rates are tracked
     const allCurrencies: Currency[] = [Currency.THB, Currency.AED, Currency.JPY];
@@ -21,13 +21,13 @@ export default async function ExchangeRatesPage() {
             <div>
                 <h2 className="text-3xl font-bold tracking-tight">Exchange Rates</h2>
                 <p className="text-muted-foreground">
-                    Manage exchange rates for currency conversion. Each currency has rates in both directions.
+                    Manage buy and sell rates for currency conversion. All rates are in MMK per 1 unit of foreign currency.
                 </p>
             </div>
 
             <ExchangeRatesForm 
-                ratesToMMK={ratesToMMK}
-                ratesFromMMK={ratesFromMMK}
+                buyRates={buyRates}
+                sellRates={sellRates}
                 currencies={allCurrencies}
             />
         </div>

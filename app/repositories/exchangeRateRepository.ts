@@ -26,7 +26,7 @@ export class ExchangeRateRepository {
         return map as Record<Currency, number>;
     }
 
-    static async getRatesFromMMKMap(): Promise<Record<Currency, number>> {
+    static async getSellRatesMap(): Promise<Record<Currency, number>> {
         const rates = await this.getAll();
         const map: Record<string, number> = { MMK: 1 };
         

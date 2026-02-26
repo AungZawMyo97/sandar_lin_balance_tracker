@@ -7,9 +7,9 @@ export class ExchangeRateService {
         return await ExchangeRateRepository.getRatesMap();
     }
 
-    /** MMK → {currency} rates map */
-    static async getRatesFromMMKMap(): Promise<Record<Currency, number>> {
-        return await ExchangeRateRepository.getRatesFromMMKMap();
+    /** Sell rates map (1 {currency} = X MMK when selling) */
+    static async getSellRatesMap(): Promise<Record<Currency, number>> {
+        return await ExchangeRateRepository.getSellRatesMap();
     }
 
     static async getRate(currency: Currency): Promise<number> {

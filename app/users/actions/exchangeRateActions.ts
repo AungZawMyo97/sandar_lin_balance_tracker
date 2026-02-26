@@ -25,18 +25,18 @@ export async function updateExchangeRatesFormAction(
         ];
 
         allCurrencies.forEach((currency) => {
-            const toMMK = formData.get(`${currency}_to_mmk`);
-            const fromMMK = formData.get(`${currency}_from_mmk`);
+            const buyMMK = formData.get(`${currency}_buy_mmk`);
+            const sellMMK = formData.get(`${currency}_sell_mmk`);
             
-            if (toMMK || fromMMK) {
-                const rateToMMK = toMMK ? parseFloat(toMMK as string) : 0;
-                const rateFromMMK = fromMMK ? parseFloat(fromMMK as string) : 0;
+            if (buyMMK || sellMMK) {
+                const buyRate = buyMMK ? parseFloat(buyMMK as string) : 0;
+                const sellRate = sellMMK ? parseFloat(sellMMK as string) : 0;
                 
-                if ((rateToMMK > 0) || (rateFromMMK > 0)) {
+                if ((buyRate > 0) || (sellRate > 0)) {
                     ratesToUpdate.push({ 
                         currency, 
-                        rate: rateToMMK, 
-                        rateFromMMK: rateFromMMK 
+                        rate: buyRate, 
+                        rateFromMMK: sellRate 
                     });
                 }
             }

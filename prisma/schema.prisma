@@ -237,8 +237,8 @@ enum Currency {
 model ExchangeRate {
   id          Int      @id @default(autoincrement())
   currency    Currency @unique
-  rate        Decimal  @db.Decimal(10, 4) // {currency} → MMK (e.g. 1 THB = X MMK)
-  rateFromMMK Decimal  @default(0) @db.Decimal(10, 4) // MMK → {currency} (e.g. 1 MMK = X THB)
+  rate        Decimal  @db.Decimal(10, 4) // Buy rate: 1 {currency} = X MMK (buying price)
+  rateFromMMK Decimal  @default(0) @db.Decimal(10, 4) // Sell rate: 1 {currency} = X MMK (selling price)
   updatedAt   DateTime @updatedAt
   createdAt   DateTime @default(now())
 
