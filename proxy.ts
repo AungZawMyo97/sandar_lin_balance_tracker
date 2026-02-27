@@ -14,8 +14,7 @@ export async function proxy(request: NextRequest) {
     try {
       await jwtVerify(session, encodedKey, { algorithms: ["HS256"] });
       isValidSession = true;
-    } catch (err) {
-      // eslint-disable-next-line no-console
+    } catch {
       console.log("Session invalid");
     }
   }

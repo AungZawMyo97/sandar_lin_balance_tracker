@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { updateExchangeRatesFormAction } from "@/app/users/actions/exchangeRateActions";
-import { Currency } from "@/app/lib/enums";
+import { updateExchangeRatesFormAction } from "@/app/actions/exchange-rate";
+import { Currency } from "@/lib/enums";
 import { Loader2 } from "lucide-react";
 import { useFormStatus } from "react-dom";
 

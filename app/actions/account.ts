@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { Currency } from "@/app/lib/enums";
+import { Currency } from "@/lib/enums";
 import { createAccountSchema } from "@/lib/schemas";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";

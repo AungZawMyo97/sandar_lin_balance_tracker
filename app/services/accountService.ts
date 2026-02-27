@@ -1,5 +1,5 @@
 import { AccountRepository } from "@/app/repositories/accountRepository";
-import { Currency } from "@/app/lib/enums";
+import { Currency } from "@/lib/enums";
 
 export const AccountService = {
     async getUserAccounts(userId: number) {

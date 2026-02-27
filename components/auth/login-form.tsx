@@ -21,7 +21,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginFormValues } from "@/lib/schemas";
 import { useState, useTransition } from "react";
-import { loginAction } from "@/app/users/actions/authActions";
+import { loginAction } from "@/app/actions/auth";
 
 export function LoginForm({ }: React.ComponentProps<"div">) {
   const [isPending, startTransition] = useTransition();

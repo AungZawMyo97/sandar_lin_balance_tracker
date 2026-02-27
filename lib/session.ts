@@ -1,7 +1,5 @@
-// import "server-only";
-import { SignJWT } from "jose";
+import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { jwtVerify } from "jose";
 
 const secretKey = process.env.SESSION_SECRET || "super-secret-key-change-this";
 const encodedKey = new TextEncoder().encode(secretKey);
@@ -40,7 +38,7 @@ export async function getCurrentUser() {
       algorithms: ["HS256"],
     });
     return payload.userId as string;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

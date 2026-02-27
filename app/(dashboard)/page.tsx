@@ -5,7 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   ArrowUpRight,
@@ -14,16 +13,15 @@ import {
   Wallet,
   TrendingUp,
   Plus,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 
 import { getCurrentUser } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { AccountService } from "@/app/services/accountService";
-import { TransactionRepository } from "@/app/repositories/transactionRepository";
+import { TransactionService } from "@/app/services/transactionService";
 import { ExchangeRateService } from "@/app/services/exchangeRateService";
-import { Currency } from "@/app/lib/enums";
 
 export default async function DashboardPage() {
   const userId = await getCurrentUser();
@@ -34,19 +32,33 @@ export default async function DashboardPage() {
   const uId = parseInt(userId);
 
   const accounts = await AccountService.getUserAccounts(uId);
-  const mmkBalance = accounts.filter(a => a.currency === "MMK").reduce((sum, a) => sum + Number(a.balance), 0);
-  const thbBalance = accounts.filter(a => a.currency === "THB").reduce((sum, a) => sum + Number(a.balance), 0);
-  const usdBalance = accounts.filter(a => a.currency === "USD").reduce((sum, a) => sum + Number(a.balance), 0);
-  const sgdBalance = accounts.filter(a => a.currency === "SGD").reduce((sum, a) => sum + Number(a.balance), 0);
+  const mmkBalance = accounts
+    .filter((a) => a.currency === "MMK")
+    .reduce((sum, a) => sum + Number(a.balance), 0);
+  const thbBalance = accounts
+    .filter((a) => a.currency === "THB")
+    .reduce((sum, a) => sum + Number(a.balance), 0);
+  const usdBalance = accounts
+    .filter((a) => a.currency === "USD")
+    .reduce((sum, a) => sum + Number(a.balance), 0);
+  const sgdBalance = accounts
+    .filter((a) => a.currency === "SGD")
+    .reduce((sum, a) => sum + Number(a.balance), 0);
 
-  // Get exchange rates from database
   const rates = await ExchangeRateService.getRatesMap();
   const RATE_THB = rates.THB || 110;
   const RATE_USD = rates.USD || 4500;
   const RATE_SGD = rates.SGD || 3300;
-  const estimatedWealth = mmkBalance + (thbBalance * RATE_THB) + (usdBalance * RATE_USD) + (sgdBalance * RATE_SGD);
+  const estimatedWealth =
+    mmkBalance +
+    thbBalance * RATE_THB +
+    usdBalance * RATE_USD +
+    sgdBalance * RATE_SGD;
 
-  const { data: recentTransactions } = await TransactionRepository.getHistory(uId, { page: 1, limit: 5 });
+  const { data: recentTransactions } = await TransactionService.getHistory(
+    uId,
+    { page: 1, limit: 5 }
+  );
 
   return (
     <div className="flex-1 space-y-6">
@@ -69,26 +81,20 @@ export default async function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Kyat
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total Kyat</CardTitle>
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               K {mmkBalance.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Cash in Hand
-            </p>
+            <p className="text-xs text-muted-foreground">Cash in Hand</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Baht
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total Baht</CardTitle>
             <span className="text-xl font-bold text-muted-foreground">฿</span>
           </CardHeader>
           <CardContent>
@@ -141,7 +147,7 @@ export default async function DashboardPage() {
                   No transactions yet.
                 </div>
               ) : (
-                recentTransactions.map((txn: any) => {
+                recentTransactions.map((txn) => {
                   let isBuy = false;
                   let displayAmount = "";
                   let displayType = "";
@@ -150,11 +156,17 @@ export default async function DashboardPage() {
                   if (txn.kind === "STANDARD") {
                     isBuy = txn.fromAccount.currency === "MMK";
                     const fAmount = isBuy ? txn.amountIn : txn.amountOut;
-                    const fCurr = isBuy ? txn.toAccount.currency : txn.fromAccount.currency;
+                    const fCurr = isBuy
+                      ? txn.toAccount.currency
+                      : txn.fromAccount.currency;
 
                     displayAmount = `${Number(fAmount).toLocaleString()} ${fCurr}`;
                     displayType = isBuy ? "BUY" : "SELL";
-                    icon = isBuy ? <ArrowDownLeft className="h-4 w-4 text-green-600" /> : <ArrowUpRight className="h-4 w-4 text-blue-600" />;
+                    icon = isBuy ? (
+                      <ArrowDownLeft className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <ArrowUpRight className="h-4 w-4 text-blue-600" />
+                    );
                   } else {
                     displayType = "CROSS";
                     displayAmount = `${Number(txn.foreignAmount).toLocaleString()} ${txn.foreignCurrency}`;
@@ -162,20 +174,36 @@ export default async function DashboardPage() {
                   }
 
                   return (
-                    <div key={txn.id + txn.kind} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                    <div
+                      key={txn.id + txn.kind}
+                      className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
+                    >
                       <div className="flex items-center gap-4">
-                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${txn.kind === 'CROSS' ? 'bg-purple-100' : 'bg-gray-100'}`}>
+                        <div
+                          className={`h-8 w-8 rounded-full flex items-center justify-center ${txn.kind === "CROSS" ? "bg-purple-100" : "bg-gray-100"}`}
+                        >
                           {icon}
                         </div>
                         <div>
-                          <p className="text-sm font-bold">{txn.customerName || txn.supplier?.name || "Ref: " + txn.id}</p>
-                          <p className="text-xs text-muted-foreground">{new Date(txn.createdAt).toLocaleTimeString()} • {displayType}</p>
+                          <p className="text-sm font-bold">
+                            {txn.kind === "STANDARD"
+                              ? (txn.customerName || "Ref: " + txn.id)
+                              : (txn.supplier?.name || "Ref: " + txn.id)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(txn.createdAt).toLocaleTimeString()} •{" "}
+                            {displayType}
+                          </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-mono font-medium">{displayAmount}</p>
+                        <p className="font-mono font-medium">
+                          {displayAmount}
+                        </p>
                         {txn.kind === "STANDARD" && (
-                          <p className="text-xs text-muted-foreground">@ {Number(txn.exchangeRate).toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">
+                            @ {Number(txn.exchangeRate).toLocaleString()}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -199,7 +227,9 @@ export default async function DashboardPage() {
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">New Transaction</h4>
-                  <p className="text-xs text-muted-foreground">Record a buy/sell</p>
+                  <p className="text-xs text-muted-foreground">
+                    Record a buy/sell
+                  </p>
                 </div>
               </div>
             </Link>
@@ -211,7 +241,9 @@ export default async function DashboardPage() {
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">Add New Agent</h4>
-                  <p className="text-xs text-muted-foreground">Register supplier</p>
+                  <p className="text-xs text-muted-foreground">
+                    Register supplier
+                  </p>
                 </div>
               </div>
             </Link>
@@ -223,7 +255,9 @@ export default async function DashboardPage() {
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">View History</h4>
-                  <p className="text-xs text-muted-foreground">Check recent logs</p>
+                  <p className="text-xs text-muted-foreground">
+                    Check recent logs
+                  </p>
                 </div>
               </div>
             </Link>

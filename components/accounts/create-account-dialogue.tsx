@@ -7,8 +7,8 @@ import {
   createAccountSchema,
   CreateAccountValues,
   currencies,
-} from "@/lib/schemas"; // Import currencies list
-import { createAccountAction } from "@/app/users/actions/accountActions";
+} from "@/lib/schemas";
+import { createAccountAction } from "@/app/actions/account";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -46,13 +46,13 @@ export function CreateAccountDialog() {
     resolver: zodResolver(createAccountSchema),
     defaultValues: {
       name: "",
-      currency: "MMK", // Default value
+      currency: "MMK",
       balance: 0,
     },
   });
 
   function onSubmit(values: CreateAccountValues) {
-    setGenericError(""); // Clear previous errors
+    setGenericError("");
     startTransition(async () => {
       const result = await createAccountAction(values);
       if (result.error) {
@@ -81,7 +81,6 @@ export function CreateAccountDialog() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Account Name */}
             <FormField
               control={form.control}
               name="name"
@@ -96,7 +95,6 @@ export function CreateAccountDialog() {
               )}
             />
 
-            {/* Currency SELECT BOX */}
             <FormField
               control={form.control}
               name="currency"
@@ -125,7 +123,6 @@ export function CreateAccountDialog() {
               )}
             />
 
-            {/* Initial Balance */}
             <FormField
               control={form.control}
               name="balance"
@@ -137,7 +134,7 @@ export function CreateAccountDialog() {
                       type="number"
                       step="0.01"
                       {...field}
-                      value={field.value as any}
+                      value={String(field.value)}
                       onChange={(e) => {
                         const val = parseFloat(e.target.value);
                         field.onChange(isNaN(val) ? 0 : val);

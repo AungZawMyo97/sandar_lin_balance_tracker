@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { ExchangeRateService } from "@/app/services/exchangeRateService";
-import { Currency } from "@/app/lib/enums";
+import { Currency } from "@/lib/enums";
 import { ExchangeRatesForm } from "@/components/exchange-rates/exchange-rates-form";
 
 export default async function ExchangeRatesPage() {
@@ -13,7 +13,6 @@ export default async function ExchangeRatesPage() {
     const buyRates = await ExchangeRateService.getRatesMap();
     const sellRates = await ExchangeRateService.getSellRatesMap();
 
-    // Only THB, AED, JPY exchange rates are tracked
     const allCurrencies: Currency[] = [Currency.THB, Currency.AED, Currency.JPY];
 
     return (
