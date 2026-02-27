@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 export default async function ClosingsPage() {
   const userId = await getCurrentUser();
-  if (!userId) redirect("/users/login");
+  if (!userId) redirect("/login");
   const uId = parseInt(userId);
 
   const accounts = await AccountService.getUserAccounts(uId);
